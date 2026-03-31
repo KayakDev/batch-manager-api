@@ -6,11 +6,15 @@ import com.kayak.batchManager.ManagerControl.Client.Entity.ClientModel;
 import com.kayak.batchManager.ManagerControl.Client.Repository.ClientRepository;
 import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
 import com.kayak.batchManager.ManagerControl.Product.Repository.ProductRepository;
+import com.kayak.batchManager.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class BatchService {
 
     private final BatchRepository batchRepository;
@@ -25,7 +29,9 @@ public class BatchService {
         this.productRepository = productRepository;
     }
 
+    @Transactional
     public BatchModel createBatch(BatchModel batch) {
+        log.info("Creating batch with code: {}", batch.getCode());
         Long clientId = batch.getClient().getId();
         Long productId = batch.getProduct().getId();
 
@@ -38,19 +44,25 @@ public class BatchService {
         batch.setClient(client);
         batch.setProduct(product);
 
-        return batchRepository.save(batch);
+        BatchModel saved = batchRepository.save(batch);
+        log.info("Batch created with id: {}", saved.getId());
+        return saved;
     }
 
     public List<BatchModel> findAllBatches() {
+        log.info("Listing all batches");
         return batchRepository.findAll();
     }
 
     public BatchModel findBatchById(Long id) {
+        log.info("Finding batch by id: {}", id);
         return batchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Batch not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
     }
 
+    @Transactional
     public BatchModel updateBatch(Long id, BatchModel updatedBatch) {
+        log.info("Updating batch with id: {}", id);
         BatchModel existingBatch = findBatchById(id);
 
         Long clientId = updatedBatch.getClient().getId();
@@ -69,11 +81,16 @@ public class BatchService {
         existingBatch.setClient(client);
         existingBatch.setProduct(product);
 
-        return batchRepository.save(existingBatch);
+        BatchModel saved = batchRepository.save(existingBatch);
+        log.info("Batch updated with id: {}", saved.getId());
+        return saved;
     }
 
+    @Transactional
     public void deleteBatch(Long id) {
+        log.info("Deleting batch with id: {}", id);
         BatchModel batch = findBatchById(id);
         batchRepository.delete(batch);
+        log.info("Batch deleted with id: {}", id);
     }
 }

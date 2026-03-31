@@ -2,6 +2,7 @@ package com.kayak.batchManager.ManagerControl.Client.Service;
 
 import com.kayak.batchManager.ManagerControl.Client.Entity.ClientModel;
 import com.kayak.batchManager.ManagerControl.Client.Repository.ClientRepository;
+import com.kayak.batchManager.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class ClientService {
     public ClientModel findById(Long id) {
         log.info("Finding client by id: {}", id);
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(("Cliente não encontrado")));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     @Transactional
