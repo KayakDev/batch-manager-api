@@ -1,44 +1,99 @@
 package com.kayak.batchManager.ManagerControl.Batch.Controller;
 
+import com.kayak.batchManager.ManagerControl.Batch.Dto.BatchDTO;
 import com.kayak.batchManager.ManagerControl.Batch.Entity.BatchModel;
 import com.kayak.batchManager.ManagerControl.Batch.Service.BatchService;
+import com.kayak.batchManager.ManagerControl.Client.Entity.ClientModel;
+import com.kayak.batchManager.ManagerControl.Client.Repository.ClientRepository;
+import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
+import com.kayak.batchManager.ManagerControl.Product.Repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/batch")
 public class BatchController {
 
     private final BatchService batchService;
+    private final ClientRepository clientRepository;
+    private final ProductRepository productRepository;
 
-    public BatchController(BatchService batchService) {
+    public BatchController(BatchService batchService, ClientRepository clientRepository, ProductRepository productRepository) {
         this.batchService = batchService;
+        this.clientRepository = clientRepository;
+        this.productRepository = productRepository;
     }
 
     @PostMapping
-    public BatchModel createBatch(@RequestBody @Valid BatchModel batch) {
-        return batchService.createBatch(batch);
+    public BatchDTO createBatch(@RequestBody @Valid BatchDTO batchDTO) {
+        BatchModel batch = new BatchModel();
+        batch.setCode(batchDTO.getCode());
+        batch.setQuantity(batchDTO.getQuantity());
+        batch.setEntryDate(batchDTO.getEntryDate());
+        batch.setStatus(batchDTO.getStatus());
+
+        ClientModel client = clientRepository.findById(batchDTO.getClientId())
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+        ProductModel product = productRepository.findById(batchDTO.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        batch.setClient(client);
+        batch.setProduct(product);
+
+        BatchModel savedBatch = batchService.createBatch(batch);
+        return mapToDTO(savedBatch);
     }
 
     @GetMapping
-    public List<BatchModel> findAllBatches() {
-        return batchService.findAllBatches();
+    public List<BatchDTO> findAllBatches() {
+        return batchService.findAllBatches().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public BatchModel findBatchById(@PathVariable Long id) {
-        return batchService.findBatchById(id);
+    public BatchDTO findBatchById(@PathVariable Long id) {
+        BatchModel batch = batchService.findBatchById(id);
+        return mapToDTO(batch);
     }
 
     @PutMapping("/{id}")
-    public BatchModel updateBatch(@PathVariable Long id, @RequestBody @Valid BatchModel batch) {
-        return batchService.updateBatch(id, batch);
+    public BatchDTO updateBatch(@PathVariable Long id, @RequestBody @Valid BatchDTO batchDTO) {
+        BatchModel batch = new BatchModel();
+        batch.setCode(batchDTO.getCode());
+        batch.setQuantity(batchDTO.getQuantity());
+        batch.setEntryDate(batchDTO.getEntryDate());
+        batch.setStatus(batchDTO.getStatus());
+
+        ClientModel client = clientRepository.findById(batchDTO.getClientId())
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+        ProductModel product = productRepository.findById(batchDTO.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        batch.setClient(client);
+        batch.setProduct(product);
+
+        BatchModel updatedBatch = batchService.updateBatch(id, batch);
+        return mapToDTO(updatedBatch);
     }
 
     @DeleteMapping("/{id}")
     public void deleteBatch(@PathVariable Long id) {
         batchService.deleteBatch(id);
+    }
+
+    private BatchDTO mapToDTO(BatchModel batch) {
+        BatchDTO dto = new BatchDTO();
+        dto.setId(batch.getId());
+        dto.setCode(batch.getCode());
+        dto.setQuantity(batch.getQuantity());
+        dto.setEntryDate(batch.getEntryDate());
+        dto.setStatus(batch.getStatus());
+        dto.setClientId(batch.getClient().getId());
+        dto.setProductId(batch.getProduct().getId());
+        return dto;
     }
 }

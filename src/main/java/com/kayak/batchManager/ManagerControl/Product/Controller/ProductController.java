@@ -1,40 +1,52 @@
 package com.kayak.batchManager.ManagerControl.Product.Controller;
 
+import com.kayak.batchManager.ManagerControl.Product.Dto.ProductDTO;
 import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
 import com.kayak.batchManager.ManagerControl.Product.Service.ProductService;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping ("/product")
 public class ProductController {
 
     private ProductService productService;
+    private ModelMapper modelMapper;
 
-    public ProductController(ProductService productService){
+    public ProductController(ProductService productService, ModelMapper modelMapper){
         this.productService = productService;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping
-    public ProductModel createProduct(@RequestBody @Valid ProductModel product){
-        return productService.createProduct(product);
+    public ProductDTO createProduct(@RequestBody @Valid ProductDTO productDTO){
+        ProductModel productModel = modelMapper.map(productDTO, ProductModel.class);
+        ProductModel savedProduct = productService.createProduct(productModel);
+        return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
     @GetMapping
-    public List<ProductModel> findAll(){
-        return productService.findAllProduct();
+    public List<ProductDTO> findAll(){
+        return productService.findAllProduct().stream()
+                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ProductModel findProductById(@PathVariable Long id) {
-        return productService.findProductById(id);
+    public ProductDTO findProductById(@PathVariable Long id) {
+        ProductModel product = productService.findProductById(id);
+        return modelMapper.map(product, ProductDTO.class);
     }
 
     @PutMapping("/{id}")
-    public ProductModel updateProduct(@PathVariable Long id, @RequestBody @Valid ProductModel updatedProduct) {
-        return productService.updateProduct(id, updatedProduct);
+    public ProductDTO updateProduct(@PathVariable Long id, @RequestBody @Valid ProductDTO productDTO) {
+        ProductModel productModel = modelMapper.map(productDTO, ProductModel.class);
+        ProductModel updatedProduct = productService.updateProduct(id, productModel);
+        return modelMapper.map(updatedProduct, ProductDTO.class);
     }
 
     @DeleteMapping("/{id}")

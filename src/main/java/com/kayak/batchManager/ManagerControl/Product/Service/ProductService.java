@@ -31,7 +31,7 @@ public class ProductService {
         ProductModel existingProduct = findProductById(id);
 
         existingProduct.setName(updatedProduct.getName());
-        existingProduct.setDescription(updatedProduct.getName());
+        existingProduct.setDescription(updatedProduct.getDescription());
         existingProduct.setPrice(updatedProduct.getPrice());
 
         return productRepository.save(existingProduct);
