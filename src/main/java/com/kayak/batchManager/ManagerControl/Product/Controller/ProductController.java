@@ -5,10 +5,9 @@ import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
 import com.kayak.batchManager.ManagerControl.Product.Mapper.ProductMapper;
 import com.kayak.batchManager.ManagerControl.Product.Service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping ("/product")
@@ -30,10 +29,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDTO> findAll(){
-        return productService.findAllProduct().stream()
-                .map(productMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<ProductDTO> findAll(Pageable pageable){
+        return productService.findAllProduct(pageable).map(productMapper::toDTO);
     }
 
     @GetMapping("/{id}")

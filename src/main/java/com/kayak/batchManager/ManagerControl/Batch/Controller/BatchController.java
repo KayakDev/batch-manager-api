@@ -8,10 +8,9 @@ import com.kayak.batchManager.ManagerControl.Client.Repository.ClientRepository;
 import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
 import com.kayak.batchManager.ManagerControl.Product.Repository.ProductRepository;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/batch")
@@ -48,10 +47,8 @@ public class BatchController {
     }
 
     @GetMapping
-    public List<BatchDTO> findAllBatches() {
-        return batchService.findAllBatches().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+    public Page<BatchDTO> findAllBatches(Pageable pageable) {
+        return batchService.findAllBatches(pageable).map(this::mapToDTO);
     }
 
     @GetMapping("/{id}")

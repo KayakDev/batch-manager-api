@@ -4,10 +4,11 @@ import com.kayak.batchManager.ManagerControl.Client.Entity.ClientModel;
 import com.kayak.batchManager.ManagerControl.Client.Repository.ClientRepository;
 import com.kayak.batchManager.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,9 +35,9 @@ public class ClientService {
         return saved;
     }
 
-    public List<ClientModel> listAllClient() {
-        log.info("Listing all clients");
-        return clientRepository.findAll();
+    public Page<ClientModel> listAllClient(Pageable pageable) {
+        log.info("Listing all clients with pagination: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        return clientRepository.findAll(pageable);
     }
 
     public ClientModel findById(Long id) {

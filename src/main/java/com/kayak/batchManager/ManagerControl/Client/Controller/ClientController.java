@@ -5,10 +5,9 @@ import com.kayak.batchManager.ManagerControl.Client.Entity.ClientModel;
 import com.kayak.batchManager.ManagerControl.Client.Mapper.ClientMapper;
 import com.kayak.batchManager.ManagerControl.Client.Service.ClientService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/client")
@@ -30,10 +29,8 @@ public class ClientController {
     }
 
     @GetMapping
-    public List<ClientDTO> listAll() {
-        return clientService.listAllClient().stream()
-                .map(clientMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<ClientDTO> listAll(Pageable pageable) {
+        return clientService.listAllClient(pageable).map(clientMapper::toDTO);
     }
 
     @GetMapping("/{id}")

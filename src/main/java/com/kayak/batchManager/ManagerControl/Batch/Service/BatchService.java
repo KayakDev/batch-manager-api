@@ -8,10 +8,10 @@ import com.kayak.batchManager.ManagerControl.Product.Entity.ProductModel;
 import com.kayak.batchManager.ManagerControl.Product.Repository.ProductRepository;
 import com.kayak.batchManager.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Slf4j
@@ -49,9 +49,9 @@ public class BatchService {
         return saved;
     }
 
-    public List<BatchModel> findAllBatches() {
-        log.info("Listing all batches");
-        return batchRepository.findAll();
+    public Page<BatchModel> findAllBatches(Pageable pageable) {
+        log.info("Listing all batches with pagination: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        return batchRepository.findAll(pageable);
     }
 
     public BatchModel findBatchById(Long id) {
